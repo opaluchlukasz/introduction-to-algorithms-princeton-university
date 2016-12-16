@@ -13,38 +13,31 @@ public class FastCollinearPoints {
 
         assertNoDuplicates(copy);
 
-        List<String> alreadySaved = new LinkedList<>();
-
         for (int i = 0; i < points.length - 3; i++) {
             Arrays.sort(copy);
             Point current = copy[i];
 
             Arrays.sort(copy, current.slopeOrder());
 
-            for (int j = 1; j < copy.length - 2; j++) {
+            int start = 1;
+            for (int end = 2; end < copy.length; end++) {
                 // first point is always the point for which sorted, since slope from same point gives minus infinity
                 // we need to find at least three more points with same slope value
-                double firstSlope = copy[0].slopeTo(copy[j]);
-                int k = 0;
-                while (j < copy.length - 1 && firstSlope == copy[j].slopeTo(copy[j + 1])) {
-                    j++;
-                    k++;
-                }
-                if (k >= 2) {
-                    LinkedList<Point> segments = new LinkedList<>();
-                    segments.add(copy[0]);
-                    for (int l = 0; l <= k; l++) {
-                        segments.add(copy[j - l]);
-                    }
+                double firstSlope = copy[0].slopeTo(copy[start]);
 
-                    segments.sort(Point::compareTo);
-                    LineSegment lineSegment = new LineSegment(segments.getFirst(), segments.getLast());
-                    if (!alreadySaved.contains(lineSegment.toString())) {
-                        alreadySaved.add(lineSegment.toString());
-                        lineSegments.add(lineSegment);
-                    }
-                    break;
+                while (end < copy.length && firstSlope == copy[start].slopeTo(copy[end])) {
+                    end++;
                 }
+                if (end - start >= 3) {
+                    if(copy[0].compareTo(copy[start]) < 0) {
+                        // We checked that considered point is less than first found point, so it is first point of the segment
+                        // and since sorting is stable we can use last found point as the end of the segment
+                        // This also protects us from saving same segment more than once
+                        lineSegments.add(new LineSegment(copy[0], copy[end - 1]));
+                    }
+                }
+                // looking for another set of collinear points (omitting already processed)
+                start = end;
             }
         }
     }
@@ -104,5 +97,24 @@ public class FastCollinearPoints {
                 new Point(5, 6)
         });
         assert fastCollinearPoints.numberOfSegments() == 2;
+
+        FastCollinearPoints fastCollinearPoints3 = new FastCollinearPoints(new Point[]{
+                new Point(10000 ,0),
+                new Point(8000 ,2000),
+                new Point(2000 ,8000),
+                new Point(0  ,10000),
+                new Point(20000 ,0),
+                new Point(18000 ,2000),
+                new Point(2000 ,18000),
+                new Point(10000 ,20000),
+                new Point(30000 ,0),
+                new Point(0 ,30000),
+                new Point(20000 ,10000),
+                new Point(13000 ,0),
+                new Point(11000 ,3000),
+                new Point(5000 ,12000),
+                new Point(9000 ,6000)
+        });
+        assert fastCollinearPoints3.numberOfSegments() == 4;
     }
 }
