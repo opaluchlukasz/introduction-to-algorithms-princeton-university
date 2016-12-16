@@ -13,33 +13,37 @@ public class FastCollinearPoints {
 
         assertNoDuplicates(copy);
 
-        List<Point> partials = new LinkedList<>();
+        List<String> alreadySaved = new LinkedList<>();
 
         for (int i = 0; i < points.length - 3; i++) {
             Arrays.sort(copy);
             Point current = copy[i];
 
-            if (partials.stream().noneMatch(point -> point.compareTo(current) == 0)) {
-                Arrays.sort(copy, copy[i].slopeOrder());
+            Arrays.sort(copy, current.slopeOrder());
 
-                for (int j = 1; j < copy.length - 2; j++) {
-                    // first point is always the point for which sorted, since slope from same point gives minus infinity
-                    // we need to find three more point with same slope value
-                    double firstSlope = copy[0].slopeTo(copy[j]);
-                    double secondSlope = copy[j].slopeTo(copy[j + 1]);
-                    double thirdSlope = copy[j + 1].slopeTo(copy[j + 2]);
-                    if(Double.compare(firstSlope, secondSlope) == 0 &&
-                            Double.compare(firstSlope, thirdSlope) == 0) {
-                        partials.add(copy[0]);
-                        partials.add(copy[j]);
-                        partials.add(copy[j + 1]);
-                        partials.add(copy[j + 2]);
-
-                        Point[] segment = new Point[] {copy[0], copy[j], copy[j + 1], copy[j + 2]};
-                        Arrays.sort(segment);
-                        lineSegments.add(new LineSegment(segment[0], segment[3]));
-                        break;
+            for (int j = 1; j < copy.length - 2; j++) {
+                // first point is always the point for which sorted, since slope from same point gives minus infinity
+                // we need to find at least three more points with same slope value
+                double firstSlope = copy[0].slopeTo(copy[j]);
+                int k = 0;
+                while (j < copy.length - 1 && firstSlope == copy[j].slopeTo(copy[j + 1])) {
+                    j++;
+                    k++;
+                }
+                if (k >= 2) {
+                    LinkedList<Point> segments = new LinkedList<>();
+                    segments.add(copy[0]);
+                    for (int l = 0; l <= k; l++) {
+                        segments.add(copy[j - l]);
                     }
+
+                    segments.sort(Point::compareTo);
+                    LineSegment lineSegment = new LineSegment(segments.getFirst(), segments.getLast());
+                    if (!alreadySaved.contains(lineSegment.toString())) {
+                        alreadySaved.add(lineSegment.toString());
+                        lineSegments.add(lineSegment);
+                    }
+                    break;
                 }
             }
         }
@@ -86,5 +90,19 @@ public class FastCollinearPoints {
                 new Point(16761 , 3377),
                 new Point(3030, 14850)});
         assert fastCollinearPoints.numberOfSegments() == 5;
+
+        fastCollinearPoints = new FastCollinearPoints(new Point[]{
+                new Point(5, 5),
+                new Point(2, 8),
+                new Point(5, 3),
+                new Point(1, 9),
+                new Point(6, 0),
+                new Point(8, 5),
+                new Point(5, 2),
+                new Point(1, 5),
+                new Point(3, 7),
+                new Point(5, 6)
+        });
+        assert fastCollinearPoints.numberOfSegments() == 2;
     }
 }
