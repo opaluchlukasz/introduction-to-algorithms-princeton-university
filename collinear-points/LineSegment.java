@@ -17,9 +17,6 @@ public class LineSegment {
     // string representation
     @Override
     public String toString() {
-        return "LineSegment{" +
-                "p=" + p +
-                ", q=" + q +
-                '}';
+        return p.toString() + " -> " + q.toString();
     }
 }
