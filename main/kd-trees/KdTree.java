@@ -66,7 +66,7 @@ public class KdTree {
     public Iterable<Point2D> range(RectHV rect) {
         List<Point2D> result = new ArrayList<>();
         if (root != null) {
-            root.intersect(rect,result);
+            root.intersect(rect, result);
         }
         return result;
     }
@@ -137,16 +137,16 @@ public class KdTree {
             return rect.contains(point);
         }
 
-        void intersect(RectHV rect, List<Point2D> result) {
-            if (this.rect.intersects(rect)) {
-                if (rect.contains(point)) {
+        void intersect(RectHV searched, List<Point2D> result) {
+            if (this.rect.intersects(searched)) {
+                if (searched.contains(point)) {
                     result.add(point);
-                    if (rt != null) {
-                        rt.intersect(rect, result);
-                    }
-                    if (lb != null) {
-                        lb.intersect(rect, result);
-                    }
+                }
+                if (rt != null) {
+                    rt.intersect(searched, result);
+                }
+                if (lb != null) {
+                    lb.intersect(searched, result);
                 }
             }
         }
