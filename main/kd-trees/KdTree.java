@@ -35,11 +35,11 @@ public class KdTree {
     // does the set contain point p?
     public boolean contains(Point2D point) {
         Node temp = root;
-        while (temp != null && temp.contains(point)) {
+        while (temp != null) {
             if (temp.point.equals(point)) {
                 return true;
             } else {
-                if (temp.rt != null && temp.rt.contains(point)) {
+                if (compare(point, temp) >= 0) {
                     temp = temp.rt;
                 } else {
                     temp = temp.lb;
@@ -47,6 +47,14 @@ public class KdTree {
             }
         }
         return false;
+    }
+
+    private static int compare(Point2D point, Node node) {
+        if (node.isVertical()) {
+            return Double.compare(point.x(), node.point.x());
+        } else {
+            return Double.compare(point.y(), node.point.y());
+        }
     }
 
     // draw all points to standard draw
@@ -90,25 +98,37 @@ public class KdTree {
         }
 
         void insert(Point2D toBeAdded) {
-            if (lb != null && lb.contains(toBeAdded)) {
-                lb.insert(toBeAdded);
-            } else if (rt != null && rt.contains(toBeAdded)) {
-                rt.insert(toBeAdded);
-            } else {
-                if (isVertical()) {
-                    //vertical
-                    if (Double.compare(toBeAdded.x(), point.x()) >= 0) {
-                        rt = new Node(toBeAdded, new RectHV(point.x(), rect.ymin(), rect.xmax(), rect.ymax()), level + 1);
-                    } else {
-                        lb = new Node(toBeAdded, new RectHV(rect.xmin(), rect.ymin(), point.x(), rect.ymax()), level + 1);
-                    }
+            int cmp = compare(toBeAdded, this);
+
+            if (cmp >= 0) {
+                if (rt != null) {
+                    rt.insert(toBeAdded);
                 } else {
-                    //horizontal
-                    if (Double.compare(toBeAdded.y(), this.point.y()) >= 0) {
-                        rt = new Node(toBeAdded, new RectHV(rect.xmin(), point.y(), rect.xmax(), rect.ymax()), level + 1);
-                    } else {
-                        lb = new Node(toBeAdded, new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), point.y()), level + 1);
-                    }
+                    addNewNode(toBeAdded);
+                }
+            } else {
+                if (lb != null) {
+                    lb.insert(toBeAdded);
+                } else {
+                    addNewNode(toBeAdded);
+                }
+            }
+        }
+
+        private void addNewNode(Point2D toBeAdded) {
+            if (isVertical()) {
+                //vertical
+                if (Double.compare(toBeAdded.x(), point.x()) >= 0) {
+                    rt = new Node(toBeAdded, new RectHV(point.x(), rect.ymin(), rect.xmax(), rect.ymax()), level + 1);
+                } else {
+                    lb = new Node(toBeAdded, new RectHV(rect.xmin(), rect.ymin(), point.x(), rect.ymax()), level + 1);
+                }
+            } else {
+                //horizontal
+                if (Double.compare(toBeAdded.y(), this.point.y()) >= 0) {
+                    rt = new Node(toBeAdded, new RectHV(rect.xmin(), point.y(), rect.xmax(), rect.ymax()), level + 1);
+                } else {
+                    lb = new Node(toBeAdded, new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), point.y()), level + 1);
                 }
             }
         }
