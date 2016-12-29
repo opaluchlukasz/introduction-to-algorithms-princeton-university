@@ -156,10 +156,10 @@ public class KdTree {
         Point2D nearest(Point2D searched, Point2D nearest, Double nearestDistance) {
 
             if (!this.contains(searched) && nearest != null) {
-                if (isVertical() && nearestDistance < searched.distanceSquaredTo(new Point2D(point.x(), searched.y()))) {
+                if (isVertical() && nearestDistance < rect.distanceSquaredTo(searched)) {
                     return nearest;
                 }
-                if (!isVertical() && nearestDistance < searched.distanceSquaredTo(new Point2D(searched.x(), point.y()))) {
+                if (!isVertical() && nearestDistance < rect.distanceSquaredTo(searched)) {
                     return nearest;
                 }
             }
@@ -171,7 +171,7 @@ public class KdTree {
             }
 
             List<Node> toBeSearched = new LinkedList<>();
-            if (compare(point, this) >= 0) {
+            if (compare(searched, this) >= 0) {
                 toBeSearched.add(this.rt);
                 toBeSearched.add(this.lb);
             } else {
