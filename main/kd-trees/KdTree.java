@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.lang.Double.MAX_VALUE;
+
 public class KdTree {
 
     private Node root;
@@ -74,7 +76,7 @@ public class KdTree {
     // a nearest neighbor in the set to point p; null if the set is empty
     public Point2D nearest(Point2D point) {
         if (size > 0) {
-            return root.nearest(point, null);
+            return root.nearest(point, null, MAX_VALUE);
         }
 
         return null;
@@ -151,51 +153,42 @@ public class KdTree {
             }
         }
 
-        Point2D nearest(Point2D searched, Point2D nearest) {
+        Point2D nearest(Point2D searched, Point2D nearest, Double nearestDistance) {
 
             if (!this.contains(searched) && nearest != null) {
-                double nearestDistance = searched.distanceSquaredTo(nearest);
-
-                if (isVertical() && nearestDistance < searched.distanceTo(new Point2D(this.point.x(), searched.y()))) {
+                if (isVertical() && nearestDistance < searched.distanceSquaredTo(new Point2D(point.x(), searched.y()))) {
                     return nearest;
                 }
-                if (!isVertical() && nearestDistance < searched.distanceTo(new Point2D(searched.x(), this.point.y()))) {
+                if (!isVertical() && nearestDistance < searched.distanceSquaredTo(new Point2D(searched.x(), point.y()))) {
                     return nearest;
                 }
-
             }
 
             double distance = searched.distanceSquaredTo(this.point);
-            if(nearest == null || distance < searched.distanceSquaredTo(nearest)) {
+            if(nearest == null || distance < nearestDistance) {
                 nearest = this.point;
+                nearestDistance = distance;
             }
 
             List<Node> toBeSearched = new LinkedList<>();
-            if (isVertical()) {
-                if (this.point.x() >= searched.x()) {
-                    toBeSearched.add(this.lb);
-                    toBeSearched.add(this.rt);
-                } else {
-                    toBeSearched.add(this.rt);
-                    toBeSearched.add(this.lb);
-                }
+            if (compare(point, this) >= 0) {
+                toBeSearched.add(this.rt);
+                toBeSearched.add(this.lb);
             } else {
-                if (this.point.y() >= searched.y()) {
-                    toBeSearched.add(this.lb);
-                    toBeSearched.add(this.rt);
-                } else {
-                    toBeSearched.add(this.rt);
-                    toBeSearched.add(this.lb);
-                }
+                toBeSearched.add(this.lb);
+                toBeSearched.add(this.rt);
             }
 
             for (Node next : toBeSearched) {
-                if (next!=null) {
-                    nearest = next.nearest(searched, nearest);
+                if (next != null) {
+                    Point2D temp = next.nearest(searched, nearest, nearestDistance);
+                    if (temp != nearest) {
+                        nearest = temp;
+                        nearestDistance = searched.distanceSquaredTo(nearest);
+                    }
                 }
             }
             return nearest;
-
         }
 
         private boolean isVertical() {
