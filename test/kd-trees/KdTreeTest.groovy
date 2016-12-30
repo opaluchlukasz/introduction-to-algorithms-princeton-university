@@ -91,17 +91,24 @@ class KdTreeTest extends Specification {
         points.forEach { kdTree.insert(it) }
 
         when:
-        Point2D nearest = kdTree.nearest(new Point2D(0.5, 0.5))
+        Point2D nearest = kdTree.nearest(new Point2D(0.478, 0.123))
 
         then:
         nearest == expected
 
         where:
-        points                                     | expected
-        []                                         | null
-        [new Point2D(1, 1)]                        | new Point2D(1d, 1d)
-        [new Point2D(0.5, 0.5), new Point2D(1, 1)] | new Point2D(0.5, 0.5)
-        [new Point2D(0.1, 0.1), new Point2D(0.2, 0.3),
-         new Point2D(0.6, 0.6)]                    | new Point2D(0.6, 0.6)
+        points                                                                        | expected
+        []                                                                            | null
+        [new Point2D(1, 1)]                                                           | new Point2D(1d, 1d)
+        [new Point2D(0.5, 0.5), new Point2D(1, 1)]                                    | new Point2D(0.5, 0.5)
+        [new Point2D(0.1, 0.1), new Point2D(0.2, 0.3), new Point2D(0.6, 0.6),
+         new Point2D(0.52, 0.52), new Point2D(0.481, 0.18), new Point2D(0.481, 0.23)] | new Point2D(0.481, 0.18)
+        [new Point2D(0.6004951776667911, 0.6053326706267271),
+         new Point2D(0.7840036245885189, 0.5944858806469853),
+         new Point2D(0.7077248129851839, 0.8647342682972582),
+         new Point2D(0.517133956656211, 0.7103055041353848),
+         new Point2D(0.6445667436677855, 0.3122595693178649),
+         new Point2D(0.7550250360772853, 0.4258528826879079),
+         new Point2D(0.671238040196645, 0.12775174306687798)]                         | new Point2D(0.671238040196645, 0.12775174306687798)
     }
 }
